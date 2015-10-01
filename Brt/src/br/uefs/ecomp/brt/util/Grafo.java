@@ -42,6 +42,8 @@ public class Grafo {
         Vertice novo = new Vertice(v);
         this.listaAdjacencia.inserirFinal((Comparable) novo);
     }
+    
+    
 
     /**
      * Remove um vertice da lista de adjacencia.
@@ -86,7 +88,10 @@ public class Grafo {
         Iterador itArestas = v.getArestas();
         //tira a referencia pro primeiro objeto, assim se perde o restante da lista de aresta
         itArestas.primeira = null;
-
+        
+        //Recebe a possição da aresta que deve ser removida
+        int cont;
+        
         /*
          remove todas as arestas que chegam no vértice v,        
          procurar em todos os vértices se o vertice v é o destino de algum
@@ -94,8 +99,9 @@ public class Grafo {
         Iterador it = listaAdjacencia.iterador();
         while (it.temProximo()) {
             Vertice aux = (Vertice) it.obterProximo();
-            if (aux.temVertice(v)) {
-                aux.removerAresta(v);
+            cont = aux.temVertice(v);
+            if (cont != -1) {
+                aux.removerAresta(cont);
             }
         }
     }
@@ -118,15 +124,10 @@ public class Grafo {
      * Procura o menor caminho de um vertice para todos os outros
      */
     public void menorCaminho(int u) {
-        Vertice vertice = null;
-        //fazer um vetor com os vertices para chegar de um vertice a outro
-        caminho = new int[listaAdjacencia.obterTamanho()];
-        //fazer um vetor com com pesos das aresta para ir de u a v
-        pesosCam = new int[listaAdjacencia.obterTamanho()];
-        //anteriores para chegar em u
-        anteriores = new int[listaAdjacencia.obterTamanho()];
+        Vertice vertice = null;        
         //o vertice inicial tem distancia zero
         disVertice(u);
+        
         Iterador it = listaAdjacencia.iterador();
         while(it.temProximo()){
             vertice = procuraMenorDistancia();
@@ -194,7 +195,7 @@ public class Grafo {
         return menor;
     }
     
-    private Vertice buscaVertice(int n) {        
+    public Vertice buscaVertice(int n) {        
         Iterador it = listaAdjacencia.iterador();
         while (it.temProximo()) {//procura os vértices de origem
             Vertice vertice = (Vertice) it.obterProximo();

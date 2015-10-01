@@ -119,29 +119,21 @@ public class Vertice {
      * @param destino, vértice no qual se quer quebrar a conecção com o vértice
      * do nó.
      */
-    public void removerAresta(Vertice destino) {
-        int cont = 0;
-        Iterador it = arestas.iterador();
-        while (it.temProximo()) {
-            Aresta ar = (Aresta) it.obterProximo();
-
-            if (ar.getDestino().equals(destino)) {
-                arestas.remover(cont);
-            }
-            cont++;
-        }
-
+    public void removerAresta(int posicao) {
+       arestas.remover(posicao);
     }
 
-    public boolean temVertice(Vertice v) {
+    public int temVertice(Vertice v) {
         Iterador itAresta = arestas.iterador();
+        int cont = 0;
         while (itAresta.temProximo()) {
             Aresta aresta = (Aresta) itAresta.obterProximo();
             if (aresta.temDestino(v)) {
-                return true;
+                return cont;
             }
+            cont ++;
         }
-        return false;
+        return -1;
     }
 
     /**
@@ -168,6 +160,21 @@ public class Vertice {
 
     public boolean getVisitado() {
         return visitado;
+    }
+    
+    public Aresta menorDistacia(){
+        Aresta aresta;
+        Aresta arestaMenor = null;
+        int menor = 0;
+        Iterador it = arestas.iterador();
+        while(it.temProximo()){
+            aresta = (Aresta) it.obterProximo();
+            if(menor > aresta.getAresta()){
+                menor = aresta.getAresta();
+                arestaMenor = aresta;
+            }
+        }
+        return arestaMenor;
     }
 
 }
