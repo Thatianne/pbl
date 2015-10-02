@@ -143,7 +143,7 @@ public class Grafo {
             vertAnt = vertProx;
 
         }
-        return null;
+        return destino;
     }
 
     public Vertice buscaVertice(int n) {
