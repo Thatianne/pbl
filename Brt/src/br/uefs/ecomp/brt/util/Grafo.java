@@ -42,8 +42,6 @@ public class Grafo {
         Vertice novo = new Vertice(v);
         this.listaAdjacencia.inserirFinal((Comparable) novo);
     }
-    
-    
 
     /**
      * Remove um vertice da lista de adjacencia.
@@ -88,10 +86,10 @@ public class Grafo {
         Iterador itArestas = v.getArestas();
         //tira a referencia pro primeiro objeto, assim se perde o restante da lista de aresta
         itArestas.primeira = null;
-        
+
         //Recebe a possição da aresta que deve ser removida
         int cont;
-        
+
         /*
          remove todas as arestas que chegam no vértice v,        
          procurar em todos os vértices se o vertice v é o destino de algum
@@ -120,82 +118,35 @@ public class Grafo {
         comeco.inserirAresta(fim, peso);//o vértice do começo que insere a aresta
     }
 
-    /**
-     * Procura o menor caminho de um vertice para todos os outros
-     */
-    public void menorCaminho(int u) {
-        Vertice vertice = null;        
-        //o vertice inicial tem distancia zero
-        disVertice(u);
-        
-        Iterador it = listaAdjacencia.iterador();
-        while(it.temProximo()){
-            vertice = procuraMenorDistancia();
-            if(vertice.getDistancia() == -1){//se tiver um vértice inacessível
-                break;                
-            }
-            vertice.setVisitado(true);            
-        }
-        
-        
-        //liberar os visitados?? colocar vertices.setVisitado(false)??
-        /*
-        Iterador it4 = listaAdjacencia.iterador();
-        while(it4.temProximo()){
-            Vertice v4 = (Vertice) it4.obterProximo();
-            v4.setVisitado(false);
-        }
-        */
-        
-        
-        
-        
-        //visitar todos os vertices vizinhos do vértice de menor distancia
-        Iterador itArestas = vertice.getArestas();
-        while (itArestas.temProximo()) {            
-            Aresta aresta = (Aresta) itArestas.obterProximo();
-            Vertice vizinho = aresta.getDestino();
-            if(vizinho.getDistancia() < 0){//ninguém chegou nele ainda, está com a distância inválida
-                //soma as distancias de vertice até seu vizinho e atribui a distância do vizinho
-                vizinho.setDistancia(vertice.getDistancia()+aresta.getAresta());
-                //o pai do 'vizinho' vai ser 'vertice'
-                vizinho.setPai(vertice);
-            }else if(vizinho.getDistancia() > vertice.getDistancia()+aresta.getAresta()){
-                vizinho.setDistancia(vertice.getDistancia()+aresta.getAresta());
-                vizinho.setPai(vertice);
-            }
-            
-        }
-        
-        
+    public Vertice menorCaminho(int u, int v) {
+        Vertice vertAnt, vertProx = null, VertMenor = null, segMenor = null;
+        Vertice destino = null;
+        Aresta arestaMenor;
+        vertAnt = buscaVertice(u);
+        destino = buscaVertice(v);
+        vertAnt.setDistancia(0);
+        vertAnt.setPai(null);
+        vertAnt.setVisitado(true);
 
-    }
-    /**
-     * Procura vertice com menor distância
-     * @return 
-     */
-    private Vertice procuraMenorDistancia(){
-        Vertice menor = null;
-        boolean primeiro = true;
-        //ir em todos os vértice        
-        Iterador it = listaAdjacencia.iterador();
+        // settar as distancias, os pais e se foi visitado se não tiver mais caminhos possiveis
+        //colocar um laço de repetição se todos foram visitados
+        while (!destino.getVisitado()) {
+            vertAnt.distProximo();//define as distâncias dos vértices vizinhos
 
-        //procura o vértice com a menor distância e que não tenha sido visitado
-        while (it.temProximo()) {
-            Vertice vert = (Vertice) it.obterProximo();
-            if(vert.getDistancia() >= 0 && (!vert.getVisitado())){
-                if(primeiro){//se for o primeiro vertice
-                    menor = vert;
-                    primeiro = false;
-                }else if(menor.getDistancia() > vert.getDistancia()){
-                    menor = vert;                    
-                }                
+            vertProx = vertAnt.menorDistancia();//menor vértice do vértice atual
+            segMenor = vertAnt.segMenorDist();
+            //pegar o segundo menor vértice se for menor que os do 'vertProx'
+            if (segMenor != null && segMenor.getDistancia() < vertProx.getDistancia()) {
+                vertProx = segMenor;
             }
+            vertProx.setVisitado(true);
+            vertAnt = vertProx;
+
         }
-        return menor;
+        return null;
     }
-    
-    public Vertice buscaVertice(int n) {        
+
+    public Vertice buscaVertice(int n) {
         Iterador it = listaAdjacencia.iterador();
         while (it.temProximo()) {//procura os vértices de origem
             Vertice vertice = (Vertice) it.obterProximo();
@@ -204,13 +155,6 @@ public class Grafo {
             }
         }
         return null;
-    }
-    /**
-     * Definir que o vertice inicial tem distância zero, e os outros tem distancia -1
-     */
-    private void disVertice(int n){
-        Vertice v = (Vertice) listaAdjacencia.recuperar(n);
-        v.setDistancia(0);
     }
 
 }

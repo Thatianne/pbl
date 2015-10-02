@@ -15,12 +15,15 @@ public class Vertice {
     private final int vertice;
     //Lista que armazena a distancia e os nós nos quais o vertice está ligado
     private final Lista arestas;
-    
+
     private boolean visitado;
     private int distancia;
     private boolean primeiro;
     private Vertice pai;
 
+    private int menor = Integer.MAX_VALUE;
+    private Vertice vertMenor = null;
+    
     public boolean isPrimeiro() {
         return primeiro;
     }
@@ -120,7 +123,7 @@ public class Vertice {
      * do nó.
      */
     public void removerAresta(int posicao) {
-       arestas.remover(posicao);
+        arestas.remover(posicao);
     }
 
     public int temVertice(Vertice v) {
@@ -131,7 +134,7 @@ public class Vertice {
             if (aresta.temDestino(v)) {
                 return cont;
             }
-            cont ++;
+            cont++;
         }
         return -1;
     }
@@ -161,20 +164,59 @@ public class Vertice {
     public boolean getVisitado() {
         return visitado;
     }
-    
-    public Aresta menorDistacia(){
+
+    public Vertice menorDistancia() {
         Aresta aresta;
         Aresta arestaMenor = null;
-        int menor = 0;
+        
+        
         Iterador it = arestas.iterador();
-        while(it.temProximo()){
+        while (it.temProximo()) {
             aresta = (Aresta) it.obterProximo();
-            if(menor > aresta.getAresta()){
-                menor = aresta.getAresta();
+            if (menor > aresta.getDestino().getDistancia()) {
+                menor = aresta.getDestino().getDistancia();
                 arestaMenor = aresta;
+                vertMenor = arestaMenor.getDestino();
             }
         }
-        return arestaMenor;
+                        
+        return vertMenor;
+    }
+    
+    public Vertice segMenorDist(){
+        int segMenor = Integer.MAX_VALUE;
+        Vertice segVertice = null;
+        Aresta segAresta;
+        Iterador it = arestas.iterador();
+        while(it.temProximo()){
+            segAresta = (Aresta) it.obterProximo();            
+            if(vertMenor.equals(segAresta.getDestino()) ){
+                //não faz nada
+                
+            }
+            else if(segMenor > segAresta.getDestino().getDistancia()){
+                segMenor = segAresta.getDestino().getDistancia();
+                segVertice = segAresta.getDestino();                
+            }
+        }
+        return segVertice;
+        
+        
+        
+    }
+
+    public void distProximo() {
+        Aresta aresta;
+        Vertice vertice;
+        Iterador it = arestas.iterador();
+        while (it.temProximo()) {
+            aresta = (Aresta) it.obterProximo();
+            vertice = aresta.getDestino();
+            if (this.distancia + aresta.getAresta() < vertice.getDistancia()) {
+                vertice.setDistancia(this.distancia + aresta.getAresta());
+                vertice.setPai(this);
+            }
+        }
     }
 
 }

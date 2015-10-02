@@ -84,18 +84,5 @@ public class GrafoTest {
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
-
-    /**
-     * Test of menorCaminho method, of class Grafo.
-     */
-    @Test
-    public void testMenorCaminho() {
-        System.out.println("menorCaminho");
-        int u = 0;
-        Grafo instance = new Grafo();
-        instance.menorCaminho(u);
-        // TODO review the generated test code and remove the default call to fail.
-        fail("The test case is a prototype.");
-    }
     
 }
