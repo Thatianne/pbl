@@ -1,6 +1,7 @@
 package br.uefs.ecomp.brt.util;
 
 import br.uefs.ecomp.brt.util.Exception.ObjetoProcuradoNaoExisteException;
+import br.uefs.ecomp.brt.util.Exception.VerticeNaoPossuiArestasException;
 
 /**
  * Define o comportamento de um grafo.
@@ -13,9 +14,6 @@ public class Grafo {
 
     //Armazena todos os nós do grafo
     private Lista listaAdjacencia;
-    private int caminho[];
-    private int pesosCam[];
-    private int anteriores[];
 
     /**
      * O contrutor sem parâmetros.
@@ -40,7 +38,26 @@ public class Grafo {
      */
     public void inserirVertice(int v) {
         Vertice novo = new Vertice(v);
-        this.listaAdjacencia.inserirFinal((Comparable) novo);
+        this.listaAdjacencia.inserirFinal(novo);
+    }
+
+    /**
+     * Inserir aresta de um vértice a outro definindo o peso
+     *
+     * @param o vértice de origem
+     * @param d vértice destino
+     * @param peso kilometragem
+     */
+    public void inserirAresta(int o, int d, int peso) throws ObjetoProcuradoNaoExisteException {
+        Vertice comeco = null, fim = null;
+
+        comeco = buscaVertice(o);
+        fim = buscaVertice(d);
+        if (comeco != null && fim != null) {
+            comeco.inserirAresta(fim, peso);//o vértice do começo que insere a aresta
+        } else {
+            throw new ObjetoProcuradoNaoExisteException("Vértice não existe");
+        }
     }
 
     /**
@@ -51,7 +68,8 @@ public class Grafo {
      * vertice a ser removido não exista.
      *
      */
-    public void removerVertice(int v) throws ObjetoProcuradoNaoExisteException {
+    public Vertice removerVertice(int v) throws ObjetoProcuradoNaoExisteException {
+        Vertice vertice = null;
         Iterador i = this.listaAdjacencia.iterador();
         int cont = 0;
 
@@ -65,7 +83,9 @@ public class Grafo {
                  e todas as arestas que chegam nesse vértice
                  */
                 this.removeTodasArestas(n);
-                this.listaAdjacencia.remover(cont);
+                vertice = (Vertice) listaAdjacencia.remover(cont);
+                return vertice;
+
             }
 
             cont++;
@@ -73,6 +93,7 @@ public class Grafo {
 
         // Caso o vertice a ser removido não exista uma exceção é gerada.
         throw new ObjetoProcuradoNaoExisteException("Este vertice não existe");
+
     }
 
     /**
@@ -80,15 +101,9 @@ public class Grafo {
      * parâmetro.
      */
     private void removeTodasArestas(Vertice v) {
-        /*
-         remove todas as arestas que saem do vértice v
-         */
-        Iterador itArestas = v.getArestas();
-        //tira a referencia pro primeiro objeto, assim se perde o restante da lista de aresta
-        itArestas.primeira = null;
 
         //Recebe a possição da aresta que deve ser removida
-        int cont;
+        int cont = 0;
 
         /*
          remove todas as arestas que chegam no vértice v,        
@@ -101,48 +116,45 @@ public class Grafo {
             if (cont != -1) {
                 aux.removerAresta(cont);
             }
+            cont++;
         }
     }
 
-    /**
-     * Inserir aresta de um vértice a outro definindo o peso
-     *
-     * @param u vértice de origem
-     * @param v vértice destino
-     * @param peso kilometragem
-     */
-    public void inserirAresta(int u, int v, int peso) {
-        Vertice comeco = null, fim = null;
-        comeco = buscaVertice(u);
-        fim = buscaVertice(v);
-        comeco.inserirAresta(fim, peso);//o vértice do começo que insere a aresta
+    public void removerAresta(int o, int d) {
     }
 
-    public Vertice menorCaminho(int u, int v) {
-        Vertice vertAnt, vertProx = null, VertMenor = null, segMenor = null;
-        Vertice destino = null;
-        Aresta arestaMenor;
-        vertAnt = buscaVertice(u);
-        destino = buscaVertice(v);
-        vertAnt.setDistancia(0);
-        vertAnt.setPai(null);
-        vertAnt.setVisitado(true);
+    public Vertice menorCaminho(int u, int v) throws VerticeNaoPossuiArestasException, ObjetoProcuradoNaoExisteException {
+        this.zerarTudo();
+        Vertice vertO, vertProx;
+        Vertice destino;
+        vertO = buscaVertice(u);//vértice que vai começar
+        destino = buscaVertice(v);//onde termina
+        vertO.setDistancia(0);//a distância dele para ele msm é zero
+        vertO.setPai(null);//não tem pai        
+        vertProx = vertO;
 
-        // settar as distancias, os pais e se foi visitado se não tiver mais caminhos possiveis
-        //colocar um laço de repetição se todos foram visitados
-        while (!destino.getVisitado()) {
-            vertAnt.distProximo();//define as distâncias dos vértices vizinhos
+        if (!vertO.temAresta()) {
+            throw new ObjetoProcuradoNaoExisteException("Caminho não existe");
+        }
 
-            vertProx = vertAnt.menorDistancia();//menor vértice do vértice atual
-            segMenor = vertAnt.segMenorDist();
-            //pegar o segundo menor vértice se for menor que os do 'vertProx'
-            if (segMenor != null && segMenor.getDistancia() < vertProx.getDistancia()) {
-                vertProx = segMenor;
-            }
+        do {
             vertProx.setVisitado(true);
-            vertAnt = vertProx;
 
-        }
+            if (vertProx.temAresta()) {
+                vertProx.distProximo();
+
+                try {
+                    vertProx = vertProx.menorDistancia();
+                } catch (VerticeNaoPossuiArestasException e) {
+                    vertProx = vertProx.getPai();
+                    if (vertProx == null) {
+                        throw new VerticeNaoPossuiArestasException("Caminho não existe");
+                    }
+                }
+            } else {
+                vertProx = vertProx.getPai();
+            }
+        } while (!destino.getVisitado());
         return destino;
     }
 
@@ -157,4 +169,71 @@ public class Grafo {
         return null;
     }
 
+    private void zerarTudo() {
+        Iterador i = listaAdjacencia.iterador();
+        Vertice v;
+
+        while (i.temProximo()) {
+            v = (Vertice) i.obterProximo();
+            v.setDistancia(Integer.MAX_VALUE);
+            v.setPai(null);
+            v.setVisitado(false);
+        }
+    }
+
+    /**
+     * Se é possível chegar do vértice 'origem' ao vértice 'destino'
+     *
+     * @return
+     */
+    public int[][] todosCaminho() {
+        /*
+         fica mais fácil encontrar todos os caminhos possíveis com a matriz de adjancência
+         então vou pegar da lista de adjacência e passar para uma matriz de adjacência
+         */
+        Vertice vertice;
+        Iterador itAresta;
+        Aresta aresta;
+        int tamanho;
+        int adjacencia[][];
+        tamanho = listaAdjacencia.obterTamanho() + 1;
+        adjacencia = new int[tamanho][tamanho];
+        //passando da lista para a matriz        
+        /*
+         se tiver dois caminhos possíveis para chegar a um ponto o menor caminho será mantido
+         por isso todas as possições vão começar com infinito para que se for menor será bustituido
+         */
+        for (int i = 0; i < tamanho; i++) {
+            for (int j = 0; j < tamanho; j++) {
+                adjacencia[i][j] = Integer.MAX_VALUE;
+            }
+        }
+        Iterador it = listaAdjacencia.iterador();
+        while (it.temProximo()) {
+            vertice = (Vertice) it.obterProximo();
+            itAresta = vertice.getArestas();
+            while (itAresta.temProximo()) {
+                aresta = (Aresta) itAresta.obterProximo();
+                if (adjacencia[vertice.getVertice()][aresta.getDestino().getVertice()] > aresta.getAresta()) {
+                    adjacencia[vertice.getVertice()][aresta.getDestino().getVertice()] = aresta.getAresta();
+                }
+            }
+        }
+        //passou da lista de adjacência para a matriz
+        //agora a implementação do algoritmo Warshall
+        for (int y = 0; y < tamanho; y++) {
+            for (int x = 0; x < tamanho; x++) {
+                if (adjacencia[y][x] != Integer.MAX_VALUE) {//se tiver uma aresta de y para x
+                    for (int z = 0; z < tamanho; z++) {
+                        if (adjacencia[x][z] != Integer.MAX_VALUE) {
+                            if (adjacencia[y][z] > adjacencia[y][x] + adjacencia[x][z]) {
+                                adjacencia[y][z] = adjacencia[y][x] + adjacencia[x][z];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return adjacencia;
+    }
 }

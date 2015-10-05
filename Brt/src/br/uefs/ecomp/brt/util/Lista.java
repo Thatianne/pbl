@@ -1,41 +1,50 @@
-
+/* A classe lista, guarda elementos em uma única estrutura*/
 package br.uefs.ecomp.brt.util;
 
 import br.uefs.ecomp.brt.util.interfaces.ILista;
-import java.io.Serializable;
 
-
-/**
- * Manipula objetos, podendo remover no inicio, final e em um posição especifica,
- * inserir inicio, final e em um posição especifica ,buscar um objeto de uma lista.
- * 
- * @author Thatianne e Sarah
- * 
- * @see Iterador
- */
-public class Lista implements ILista, Serializable{
-
-    private Celula primeira;//referencia o inicio da lista
-    private Celula ultima;//o final
-    private Celula atual;//axilia nas funções de uma lista
-
-    
-    /**Verifica se a lista está vazia.
-     * @return boolean
+    /** Classe que implementa um comportamento de uma lista.
+     * Todos os métodos da classe foram implementados a partir
+     * a interface ILista.
+     * 
+     * @author Sarah Pereira Cerqueira
+     * @see br.uefs.ecomp.av.util.ILista
      */
+   public class Lista implements ILista {
+    
+    //Primeira celula da lista
+    Celula primeira;
+    
+    //Ultima Célula da Lista
+    Celula ultima;
+    
+    /** Construtor da lista, não recebe parâmetros.
+    */
+    //Construtor
+    public Lista (){
+    //Inicialização do iterador
+    primeira = null;}
+    
+     /** Retornar verdadeiro se a lista estiver vazia. 
+    * Método implementado da inteface ILista.
+    * 
+    * @see  br.uefs.ecomp.av.util.ILista
+    * 
+    * @return verdadeiro se a lista não tiver elementos
+    */
     @Override
+    /*Método da interface ILista, retorna verdadeiro se a lista estiver sem elementos e falso se a 
+    lista tiver elementos*/
     public boolean estaVazia() {
-        return primeira == null;
-    }
- 
+        return this.primeira == null;}
+    
     /**Retorna o tamanho da lista. 
      * Método implementado da interface ILista.
      * 
-     * @see br.uefs.ecomp.av.util.interfaces.ILista
+     * @see br.uefs.ecomp.av.util.ILista
      * 
      * @return quantidade de elementos da lista
      */
-    
     @Override
     //Método da inteface ILista, retorna a quantidade de itens da lista
     public int obterTamanho() {
@@ -60,121 +69,256 @@ public class Lista implements ILista, Serializable{
 
         return tamanho;}// Fim do método obterTamanho
     
-    /**
-     * Iterador da lista, serve para percorrer a lista.
-     * @return Iterador
+    /** Inserir um objeto no Inicio da lista.
+     * Método implementado da interface ILista
+     * 
+     * @param o, objeto a ser inserido na lista
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
      */
     @Override
-    public Iterador iterador() {
-        Iterador iterador = new Iterador(primeira);//o iterador recebe a primeira posição da lista
-        return iterador;
-    }  
-
-    /**
-     * Insere o objeto passado por parâmetro na posição passada por parâmetro.
-     * @param index, posição em que o objeto será inserido
-     * @param o, objeto que será inserido
-     */
-    @Override
-    public void inserir(int index, Comparable o) {
+    //Método da interface ILista, inseri elementos no inicio da lista
+    public void inserirInicio(Object o) {
         
-        int cont = 0;
-        Celula meio = new Celula(o);
-        this.atual = this.primeira;
-        if (index == 0) {//se for inserir no começo
-            if (estaVazia()) {//se ainda estiver vazia
-                this.primeira = meio;
-                meio.setAnt(null);
-                meio.setProx(null);
-                this.ultima = this.primeira;
+        //Inicialização da nova celula a ser inserida na lista
+        Celula novacelula = new Celula(o);
+        
+       //Verifica se é o primeiro elemento da lista
+       if (estaVazia()){
+           
+            //Primeira celula da lista recebe nova   
+           this.primeira = novacelula;
 
-            } else {//se já tiver elementos
-                this.primeira.setAnt(meio);
-                meio.setProx(primeira);
-                meio.setAnt(null);
-                this.primeira = meio;
-                this.atual = primeira;
-            }
-        } else {//se não for na primeira posição
-            while (cont + 1 < index) {
-                this.atual = this.atual.getProx();
-                cont++;
-            }
-            if (this.atual == this.ultima) {//se for inserir no final
-                this.ultima.setProx(meio);
-                meio.setAnt(ultima);
-                this.ultima = this.ultima.getProx();
-                this.atual = this.ultima;
-            } else {
-                Celula aux;
-                aux = this.atual.getProx();
-                this.atual.setProx(meio);
-                meio.setAnt(atual);
-                aux.setAnt(meio);
-                meio.setProx(aux);
+           //O primeiro elemento é igual ao último elemento da lista
+           this.ultima = this.primeira;}//Fim do if
+        
+       //Se não for o primeiro elemento da lista
+        else {
+            //O campo anterior da celula primeira recebe a nova celula
+            this.primeira.setAnt(novacelula);
+            
+            //O campo próximo da celula nova recebe a primeira celula
+            novacelula.setProx(primeira);
+            
+            //A celula nova passa a ser a primeira celula
+            this.primeira = novacelula;}//Fim do else
+    }//Fim do Método inserirInicio
 
-            }
-        }
-    }
-    
-    /**
-     * Insere no incio da lista.
-     * @param o , objeto a ser inserido
+    /** Inserir um objeto no final lista.
+     * Método implementado da interface ILista
+     * 
+     * @param o, objeto a ser inserido no final da lista
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
      */
     @Override
-    public void inserirInicio(Comparable o) {
-        Celula aux = new Celula(o);
-        if (estaVazia()) {//se estiver a lista estiver vazia, primeira vai referenciar nulo
-            this.ultima = aux;
-            this.primeira = aux;
-            aux.setProx(null);
-            aux.setAnt(null);
-        } else {
-
-            this.primeira.setAnt(aux);
-            aux.setProx(primeira);
-            aux.setAnt(null);
-            this.primeira = aux;//a primeira vai mudar de posição, passando a referenciar o novo objeto inserido
-        }
-    }
+    //Método da interface ILista, inseri elementos no fim da lista
+    public void inserirFinal(Object o) {
+        
+        //Inicializa a nova celula
+       Celula novacelula = new Celula(o);
+        
+      // Verifica se é o primeiro elemento da lista 
+       if (estaVazia()){
+        
+       //Primeira recebe a celula noba
+       this.primeira = novacelula;
+       
+       //Primeira é igula a ultima
+       this.ultima = this.primeira;}
+        
+       
+       //Se a lista já tive elemento
+        else {
+           // O campo proxima da última celula recebe celula nova
+            ultima.setProx(novacelula);
+            
+            //O campo anterior da celula nova recebe última
+            novacelula.setAnt(ultima);
+            
+            //Última passa a ser a nova celula
+            ultima = novacelula;}//Fim do else
     
-    /**
-     * Insere no final da lista.
+    }//Fim do Método inserirFinal
+
+    /** Remove um elemento do inicio da lista.
+     * Método implementado da interface ILista
+     * 
+     * @return retorna o objeto removido
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
+    */
+    @Override
+    //Método da interface ILista, remove a primeira celula da lista
+    public Object removerInicio() {
+        
+         if (estaVazia()){
+            return null;}
+        
+        //Celula auxiliar guarda o endereço da célula a ser excluída
+        Celula celula = primeira;
+        
+         //Verifica se é a única celula da lista
+        if (this.primeira == this.ultima){
+            this.primeira = this.ultima = null;
+        }//Fim do if
+        
+       else {
+        //A primeira celula passa a ser a segunda
+        this.primeira = this.primeira.getProx();
+        
+        //O laço entre a primeira celula e a lista é cortado
+        this.primeira.setAnt(null);}
+        
+        //Retorna o elemento da celula removida
+        return celula.getChave();
+        }
+        
+    
+    /** Remove um elemento do final da lista.
+     * Método implementado da interface ILista
+     * 
+     * @return retorna o objeto removido
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
+    */
+    @Override
+    ////Método da interface ILista, remove a ultima celula da lista
+    public Object removerFinal() {
+        
+        if (estaVazia()){
+            return null;}
+        
+        //Declaração da celula auxiliar, que recebe o endereço da celula a ser removida
+        Celula celula = ultima;
+        
+        //Verifica se é a única celula da lista
+        if (this.primeira == this.ultima){
+            this.primeira = this.ultima = null;
+        }//Fim do if
+        
+        else{
+        
+        //A última celula passa a ser a penúltima
+        this.ultima = this.ultima.getAnt();
+        
+        //A penúltima celula perde o endereço da última, fazendo da penúltima celula a última;
+        this.ultima.setProx(null);}
+        
+        //Retorna o elemento da celula removida
+        return celula.getChave();}// Fim do método removerFinal
+     
+    /** Retorna um elemento a partir da posição.
+     * Método implementado da interface ILista
+     * 
+     * @param index, posição do objeto que vai ser retornado
+     * @return retorna o objeto da posição passada como parêmetro
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
+     */
+    @Override
+    //Busca um elemento na lista
+    public Object recuperar(int index) {
+        
+       //Instancia um iterador para pecorrer a lista
+       Iterador iterador = new Iterador (primeira);
+        
+       //Verifica se a lista está varia
+        if (estaVazia())
+            return null;
+        
+        //Contador para saber em que posição da lista está
+        int contador = 0;
+        
+       //Pecorre a lista até encontrar o elemento com o index desejado
+       while (iterador.temProximo()){
+           
+           // Sai do while se o contador for igual ao index
+           if (contador == index)
+              break;
+           
+           //Atualiza cotador e o iterador
+           contador ++;
+           iterador.obterProximo();} 
+        
+       //Retorna o objeto procurado
+        return iterador.obterProximo();}
+    
+    /**Retorna o iterador da lista.
+     * Método implementado da interface ILista
+     * 
+     * @return iterador;
+     * @see br.uefs.ecomp.av.util.ILista
+     * @see br.uefs.ecomp.av.util.Iterador
+     */
+    @Override
+    ////Método da interface ILista, retorna o iterador da lista
+    public Iterador iterador() {
+       Iterador iterador = new Iterador (primeira);
+        return iterador;}
+    
+    /**Inseri um objeto numa determinada posição.
+     * Método implementado da interface ILista.
+     * 
+     * @param index, posição em que o elemento vai ser inserido
      * @param o, objeto a ser inserido
+     * 
+     * @see br.uefs.ecomp.av.util.ILista
      */
-
     @Override
-    public void inserirFinal(Comparable o) {        
-        //a nova celula vai refenrenciar o objeto 'o'
-        Celula aux = new Celula(o);
-        if (estaVazia()) {//se for o primeiro elemento a ser inserido
-            this.ultima = aux;
-            this.primeira = aux;
-            aux.setAnt(null);
-            aux.setProx(null);
-        } else {// se não
-            this.ultima.setProx(aux);
-            aux.setAnt(ultima);
-            aux.setProx(null);
-            this.ultima = aux;
-        }
-    }
-    
-   /**Remove um objeto de determinada posição.
+    public void inserir(int index, Object o) {
+        
+        //Cria iterador para pecorrer a lista
+        Iterador iterador = new Iterador (primeira);
+        
+        //Verifica se a lista está vazia ou se o index é zero inserindo o elemento no inicio da lista
+        if (estaVazia() || index == 0){
+            inserirInicio(o);
+            return;}
+        
+        //Declaração de variaveis auxiliares
+        Celula celula,nova;
+        int contador = 0;
+        
+        //Iterador para o inicio da lista
+        iterador.reset();
+        
+        // Pecorre a lista em busca da posição desejada
+        while (iterador.temProximo()){
+                
+            //Se a posição for igual ao index, inseri o elemento na posição
+              if(contador == index){
+                celula = iterador.getAtual();
+                nova = new Celula (o);
+                celula.setAnt(nova);
+                celula = nova.getAnt();
+                celula.setProx(nova);
+                return;
+                }
+            //Se não entrar o if, o contador e o iterado é atualizado                 
+            contador++;
+            iterador.obterProximo();}
+            
+            /*Se o index for maior que a ultima posição a lista ou index for igual a contador
+        o elemento é inserido no final da lista*/
+            if (contador < index || contador == index )
+                inserirFinal(o);}
+
+     /**Remove um objeto de determinada posição.
      * Método implementado da interface ILista.
      * 
      * @param index, posição do elemento vai ser removido
      * 
      * @return retorna o objeto removido 
-     * @see br.uefs.ecomp.av.util.interfaces.ILista
+     * @see br.uefs.ecomp.av.util.ILista
      */
     @Override
-    public Comparable remover(int index) {
+    public Object remover(int index) {
         //Instancia um iterador para pecorrer a lista
         Iterador iterador = new Iterador (primeira);
         
         //Declaração de variável auxiliar
-        Comparable o = null;
+        Object o = null;
         
         //Verifica se a lista está vazia
         if (estaVazia()){
@@ -207,7 +351,7 @@ public class Lista implements ILista, Serializable{
                
                //Remove um elemento do meio da lista
                } 
-               o = aux.getNovo();
+               o = aux.getChave();
                celula = aux.getAnt();
                celula.setProx(aux.getProx());
                celula = aux.getProx();
@@ -223,72 +367,4 @@ public class Lista implements ILista, Serializable{
       return o;
     }
     
-    /**
-     * Remove o inicio.
-     * @return Object removido
-     */
-
-    @Override
-    public Comparable removerInicio() {
-        Comparable retornar;
-        if (estaVazia())//sem itens
-        {
-            return null;
-        } else if (this.primeira == this.ultima) {//unico elemento
-            retornar = this.primeira.getNovo();
-            this.primeira = null;
-            this.ultima = this.primeira;
-        }//mais de um
-        else {
-            this.atual = this.primeira;
-            this.primeira = this.primeira.getProx();
-            this.primeira.setAnt(null);
-            this.atual.setAnt(null);
-            retornar = this.atual.getNovo();
-        }
-        return retornar;
-    }
-
-    /**
-     * Remove o final da lista.
-     * @return Object removido
-     */
-    @Override
-    public Comparable removerFinal() {
-        Comparable retornar;
-        if (estaVazia()) {//se estiver vazia
-            return null;
-        } else if (this.primeira == this.ultima) {//se tiver apenas um elemento
-            retornar = this.primeira.getNovo();//objeto a ser retornado
-            this.primeira = null;
-            this.ultima = this.primeira;//primeira e ultima referencia nulo
-        } else {//outros casos
-            this.atual = this.ultima;//atual recebe a ultima posição
-            this.ultima = this.ultima.getAnt();//o ultimo referenca uma posição anterior
-            this.ultima.setProx(null);//o proximo de ultimo aponta pra nulo
-            this.atual.setAnt(null);//e o anterior do atual aponta pra nulo, o proximo dele ja está apontando pra nulo or ser ultima posição
-            retornar = this.atual.getNovo();
-        }
-        return retornar;
-    }
-    
-    /**
-     * Retorna o objeto que está na posição passada por parâmetro.
-     * @param index, posição a ser recuperada
-     * @return Object encontrado
-     */
-    @Override
-    public Comparable recuperar(int index) {
-        int cont = 0;
-        atual = primeira;
-        while(cont!=index){
-            atual = atual.getProx();//atual vai mudando pra posição pocição até chegar na posição que deseja excluir
-            cont++;
-        }
-        if(atual == null)
-            return null;
-        else
-        return atual.getNovo();
-    }
-
-}
+}//Fim da Classe Lista

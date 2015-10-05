@@ -49,7 +49,7 @@ public class Iterador implements IIterador, Serializable {
         if(temProximo()){
             aux = atual;
             atual = atual.getProx();//o aux passa para a proxima celula
-            return aux.getNovo();//o objeto referenciado por atual é retornado
+            return aux.getChave();//o objeto referenciado por atual é retornado
         }
         return null;
     }

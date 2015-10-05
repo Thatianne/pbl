@@ -1,6 +1,7 @@
 package br.uefs.ecomp.brt.util;
 
 import br.uefs.ecomp.brt.util.Exception.ObjetoProcuradoNaoExisteException;
+import br.uefs.ecomp.brt.util.Exception.VerticeNaoPossuiArestasException;
 
 /**
  * Define o comportamento do nó de um grafo.
@@ -15,22 +16,9 @@ public class Vertice {
     private final int vertice;
     //Lista que armazena a distancia e os nós nos quais o vertice está ligado
     private final Lista arestas;
-
     private boolean visitado;
     private int distancia;
-    private boolean primeiro;
     private Vertice pai;
-
-    private int menor = Integer.MAX_VALUE;
-    private Vertice vertMenor = null;
-    
-    public boolean isPrimeiro() {
-        return primeiro;
-    }
-
-    public void setPrimeiro(boolean primeiro) {
-        this.primeiro = primeiro;
-    }
 
     public Vertice getPai() {
         return pai;
@@ -38,6 +26,10 @@ public class Vertice {
 
     public void setPai(Vertice pai) {
         this.pai = pai;
+    }
+
+    public int qtdArestas() {
+        return arestas.obterTamanho();
     }
 
     /**
@@ -49,7 +41,12 @@ public class Vertice {
         vertice = v;
         arestas = new Lista();
         visitado = false;
-        distancia = -1;
+        distancia = Integer.MAX_VALUE;
+        this.pai = null;
+    }
+
+    public boolean temAresta() {
+        return !arestas.estaVazia();
     }
 
     public int getDistancia() {
@@ -74,7 +71,7 @@ public class Vertice {
      *
      * @return iterador da lista de arestas.
      */
-    public Iterador getArestas() {
+    public Iterador getArestas() {       
         return arestas.iterador();
     }
 
@@ -112,7 +109,7 @@ public class Vertice {
      */
     public void inserirAresta(Vertice destino, int aresta) {
         Aresta a = new Aresta(destino, aresta);
-        arestas.inserirFinal((Comparable) a);
+        arestas.inserirFinal(a);
 
     }
 
@@ -128,13 +125,17 @@ public class Vertice {
 
     public int temVertice(Vertice v) {
         Iterador itAresta = arestas.iterador();
-        int cont = 0;
-        while (itAresta.temProximo()) {
-            Aresta aresta = (Aresta) itAresta.obterProximo();
-            if (aresta.temDestino(v)) {
-                return cont;
+
+        if (itAresta != null) {
+
+            int cont = 0;
+            while (itAresta.temProximo()) {
+                Aresta aresta = (Aresta) itAresta.obterProximo();
+                if (aresta.temDestino(v)) {
+                    return cont;
+                }
+                cont++;
             }
-            cont++;
         }
         return -1;
     }
@@ -165,44 +166,28 @@ public class Vertice {
         return visitado;
     }
 
-    public Vertice menorDistancia() {
+    public Vertice menorDistancia() throws VerticeNaoPossuiArestasException {
         Aresta aresta;
         Aresta arestaMenor = null;
-        
-        
+        Vertice vertMenor = null;
+        int aux, menor = Integer.MAX_VALUE;
+
         Iterador it = arestas.iterador();
+
         while (it.temProximo()) {
             aresta = (Aresta) it.obterProximo();
-            if (menor > aresta.getDestino().getDistancia()) {
-                menor = aresta.getDestino().getDistancia();
-                arestaMenor = aresta;
-                vertMenor = arestaMenor.getDestino();
+            aux = aresta.getDestino().getDistancia();
+            if (aux <= menor && (!aresta.getDestino().getVisitado())) {
+                menor = aux;
+                vertMenor = aresta.getDestino();
             }
         }
-                        
+
+        if (vertMenor == null) {
+            throw new VerticeNaoPossuiArestasException("Não existe caminho");
+        }
+
         return vertMenor;
-    }
-    
-    public Vertice segMenorDist(){
-        int segMenor = Integer.MAX_VALUE;
-        Vertice segVertice = null;
-        Aresta segAresta;
-        Iterador it = arestas.iterador();
-        while(it.temProximo()){
-            segAresta = (Aresta) it.obterProximo();            
-            if(vertMenor.equals(segAresta.getDestino()) ){
-                //não faz nada
-                
-            }
-            else if(segMenor > segAresta.getDestino().getDistancia()){
-                segMenor = segAresta.getDestino().getDistancia();
-                segVertice = segAresta.getDestino();                
-            }
-        }
-        return segVertice;
-        
-        
-        
     }
 
     public void distProximo() {

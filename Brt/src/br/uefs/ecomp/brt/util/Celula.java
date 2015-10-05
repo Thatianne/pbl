@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class Celula implements Serializable {
     
     //uma celula tem referência para:
-    private Comparable novo;//um objeto
+    private Object chave;//um objeto
     private Celula prox;//para um proxima celula
     private Celula ant;//e para uma anterior
     //pois é duplamente encadeada
@@ -19,17 +19,18 @@ public class Celula implements Serializable {
      * 
      * @param o, objeto a ser inserido na celula
      */
-    public Celula(Comparable o) {
-      this.novo = o;
+    public Celula(Object o) {
+      this.chave = o;
       this.prox = null;
+      this.ant = null;
     }
     
     /** Retorna o objeto da celula.
      * 
      * @return novo
      */
-    public Comparable getNovo() {
-        return novo;
+    public Object getChave() {
+        return chave;
     }
 
     
@@ -37,8 +38,8 @@ public class Celula implements Serializable {
      * 
      * @param novo valor do obejeto da celula
      */
-    public void setNovo(Comparable novo) {
-        this.novo = novo;
+    public void setNovo(Object novo) {
+        this.chave = novo;
         
     }
     
