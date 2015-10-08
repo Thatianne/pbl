@@ -190,10 +190,13 @@ public class GrafoTest {
         g.inserirAresta(4, 6, 2);
         
         g.inserirAresta(5, 6, 4);
+        g.todosCaminho();
+        float adjacencia[][] = g.getAdjacencia();
+        int caminhos[][] = g.getCaminhos();
         
-        int adjacencia[][] = g.todosCaminho();
-        assertEquals(5,adjacencia[1][4]);
-        assertEquals(4, adjacencia[1][5]);
+        assertEquals(5,adjacencia[1][4], 0.01);
+        assertEquals(4, adjacencia[1][5], 0.01);
+        assertEquals(5, caminhos[1][4]);
         
     }
 }

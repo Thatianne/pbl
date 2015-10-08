@@ -12,14 +12,32 @@ import br.uefs.ecomp.brt.util.Exception.VerticeNaoPossuiArestasException;
  */
 public class Grafo {
 
+    private static final int qtd = 30;
+    private int prox;
+    private int tamanho;
+    private int maiorVertice = 0;
     //Armazena todos os nós do grafo
-    private Lista listaAdjacencia;
+    private Lista listaTodos;
+    private float adjacencia[][];
+    private int passagens[][];
 
     /**
      * O contrutor sem parâmetros.
      */
     public Grafo() {
-        listaAdjacencia = new Lista();
+        this.tamanho = qtd+1;
+        adjacencia = new float[tamanho][tamanho];
+        passagens = new int[tamanho][tamanho];
+        listaTodos = new Lista();
+        infinito();
+    }
+
+    public Grafo(int tamanho) {
+        this.tamanho = tamanho+1;
+        adjacencia = new float[tamanho][tamanho];
+        passagens = new int[tamanho][tamanho];
+        listaTodos = new Lista();
+        infinito();
     }
 
     /**
@@ -28,7 +46,7 @@ public class Grafo {
      * @return verdadeiro de o grafo não tiver nós.
      */
     public Boolean grafoVazio() {
-        return listaAdjacencia.estaVazia();
+        return listaTodos.estaVazia();
     }
 
     /**
@@ -37,8 +55,10 @@ public class Grafo {
      * @param v, vertice a ser inserido.
      */
     public void inserirVertice(int v) {
-        Vertice novo = new Vertice(v);
-        this.listaAdjacencia.inserirFinal(novo);
+        adjacencia[v][v] = 0;
+        passagens[v][v] = v;
+        Vertice novoVertice = new Vertice(v);
+        listaTodos.inserirFinal(novoVertice);
     }
 
     /**
@@ -49,15 +69,8 @@ public class Grafo {
      * @param peso kilometragem
      */
     public void inserirAresta(int o, int d, int peso) throws ObjetoProcuradoNaoExisteException {
-        Vertice comeco = null, fim = null;
-
-        comeco = buscaVertice(o);
-        fim = buscaVertice(d);
-        if (comeco != null && fim != null) {
-            comeco.inserirAresta(fim, peso);//o vértice do começo que insere a aresta
-        } else {
-            throw new ObjetoProcuradoNaoExisteException("Vértice não existe");
-        }
+        adjacencia[o][d] = peso;
+        adjacencia[d][o] = peso;
     }
 
     /**
@@ -69,99 +82,48 @@ public class Grafo {
      *
      */
     public Vertice removerVertice(int v) throws ObjetoProcuradoNaoExisteException {
-        Vertice vertice = null;
-        Iterador i = this.listaAdjacencia.iterador();
-        int cont = 0;
+        Vertice vertice;
+        vertice = buscaVertice(v);//se o vértice ja tiver sido inserido
 
-        /* Percorrer a lista em busca do index do nó que possui o vertice passado.*/
-        while (i.temProximo()) {
-            Vertice n = (Vertice) i.obterProximo();
-
-            if (n.getVertice() == v) {
-                /*
-                 precisa remover todas as arestas que saem do vértice que se quer remover 
-                 e todas as arestas que chegam nesse vértice
-                 */
-                this.removeTodasArestas(n);
-                vertice = (Vertice) listaAdjacencia.remover(cont);
-                return vertice;
-
+        if (vertice != null) {
+            for (int i = 0; i < tamanho; i++) {
+                //a distância para os outros vértices fica infinita 
+                //pois não existe mais tal vértice 'v'
+                adjacencia[v][i] = Float.MAX_VALUE;
+                adjacencia[i][v] = Float.MAX_VALUE;
             }
-
-            cont++;
+            
+            //tira da lista de todos os vértices
+            Iterador i = this.listaTodos.iterador();
+            int cont = 0;
+            /* Percorrer a lista em busca do index do nó que possui o vertice passado.*/
+            while (i.temProximo()) {
+                Vertice n = (Vertice) i.obterProximo();
+                if (n.getVertice() == v) {
+                    vertice = (Vertice) listaTodos.remover(cont);
+                    return vertice;
+                }
+                cont++;
+            }
         }
-
-        // Caso o vertice a ser removido não exista uma exceção é gerada.
-        throw new ObjetoProcuradoNaoExisteException("Este vertice não existe");
-
+        return vertice;
     }
 
-    /**
-     * Remove todas as arestas que tem como destino o vertice passado como
-     * parâmetro.
-     */
-    private void removeTodasArestas(Vertice v) {
-
-        //Recebe a possição da aresta que deve ser removida
-        int cont = 0;
-
-        /*
-         remove todas as arestas que chegam no vértice v,        
-         procurar em todos os vértices se o vertice v é o destino de algum
-         */
-        Iterador it = listaAdjacencia.iterador();
-        while (it.temProximo()) {
-            Vertice aux = (Vertice) it.obterProximo();
-            cont = aux.temVertice(v);
-            if (cont != -1) {
-                aux.removerAresta(cont);
-            }
-            cont++;
-        }
-    }
 
     public void removerAresta(int o, int d) {
+        adjacencia[o][d] = Float.MAX_VALUE;
+        adjacencia[d][o] = Float.MAX_VALUE;
     }
 
     public Vertice menorCaminho(int u, int v) throws VerticeNaoPossuiArestasException, ObjetoProcuradoNaoExisteException {
-        this.zerarTudo();
-        Vertice vertO, vertProx;
-        Vertice destino;
-        vertO = buscaVertice(u);//vértice que vai começar
-        destino = buscaVertice(v);//onde termina
-        vertO.setDistancia(0);//a distância dele para ele msm é zero
-        vertO.setPai(null);//não tem pai        
-        vertProx = vertO;
-
-        if (!vertO.temAresta()) {
-            throw new ObjetoProcuradoNaoExisteException("Caminho não existe");
-        }
-
-        do {
-            vertProx.setVisitado(true);
-
-            if (vertProx.temAresta()) {
-                vertProx.distProximo();
-
-                try {
-                    vertProx = vertProx.menorDistancia();
-                } catch (VerticeNaoPossuiArestasException e) {
-                    vertProx = vertProx.getPai();
-                    if (vertProx == null) {
-                        throw new VerticeNaoPossuiArestasException("Caminho não existe");
-                    }
-                }
-            } else {
-                vertProx = vertProx.getPai();
-            }
-        } while (!destino.getVisitado());
-        return destino;
+        return null;
     }
 
     public Vertice buscaVertice(int n) {
-        Iterador it = listaAdjacencia.iterador();
-        while (it.temProximo()) {//procura os vértices de origem
+        Iterador it = listaTodos.iterador();
+        while (it.temProximo()) {
             Vertice vertice = (Vertice) it.obterProximo();
+            //procura o vértice que tem o número passado por parâmetro
             if (vertice.getVertice() == n) {
                 return vertice;
             }
@@ -170,15 +132,12 @@ public class Grafo {
     }
 
     private void zerarTudo() {
-        Iterador i = listaAdjacencia.iterador();
-        Vertice v;
-
-        while (i.temProximo()) {
-            v = (Vertice) i.obterProximo();
-            v.setDistancia(Integer.MAX_VALUE);
-            v.setPai(null);
-            v.setVisitado(false);
+        for(int i=0; i<tamanho; i++){
+            for(int j=0; i<tamanho; j++){
+                adjacencia[i][j] = Float.MAX_VALUE;
+            }
         }
+        //falta tirar todos os vértices da lista
     }
 
     /**
@@ -186,40 +145,8 @@ public class Grafo {
      *
      * @return
      */
-    public int[][] todosCaminho() {
-        /*
-         fica mais fácil encontrar todos os caminhos possíveis com a matriz de adjancência
-         então vou pegar da lista de adjacência e passar para uma matriz de adjacência
-         */
-        Vertice vertice;
-        Iterador itAresta;
-        Aresta aresta;
-        int tamanho;
-        int adjacencia[][];
-        tamanho = listaAdjacencia.obterTamanho() + 1;
-        adjacencia = new int[tamanho][tamanho];
-        //passando da lista para a matriz        
-        /*
-         se tiver dois caminhos possíveis para chegar a um ponto o menor caminho será mantido
-         por isso todas as possições vão começar com infinito para que se for menor será bustituido
-         */
-        for (int i = 0; i < tamanho; i++) {
-            for (int j = 0; j < tamanho; j++) {
-                adjacencia[i][j] = Integer.MAX_VALUE;
-            }
-        }
-        Iterador it = listaAdjacencia.iterador();
-        while (it.temProximo()) {
-            vertice = (Vertice) it.obterProximo();
-            itAresta = vertice.getArestas();
-            while (itAresta.temProximo()) {
-                aresta = (Aresta) itAresta.obterProximo();
-                if (adjacencia[vertice.getVertice()][aresta.getDestino().getVertice()] > aresta.getAresta()) {
-                    adjacencia[vertice.getVertice()][aresta.getDestino().getVertice()] = aresta.getAresta();
-                }
-            }
-        }
-        //passou da lista de adjacência para a matriz
+    public void todosCaminho() {
+       
         //agora a implementação do algoritmo Warshall
         for (int y = 0; y < tamanho; y++) {
             for (int x = 0; x < tamanho; x++) {
@@ -228,12 +155,41 @@ public class Grafo {
                         if (adjacencia[x][z] != Integer.MAX_VALUE) {
                             if (adjacencia[y][z] > adjacencia[y][x] + adjacencia[x][z]) {
                                 adjacencia[y][z] = adjacencia[y][x] + adjacencia[x][z];
+                                passagens[y][z] = x;
                             }
                         }
                     }
                 }
             }
         }
+
+        /*
+         for (int y = 0; y < tamanho; y++) {
+         for (int x = 0; x < tamanho; x++) {
+         for (int z = 0; z < tamanho; z++) {
+         if (adjacencia[y][z] != Integer.MAX_VALUE && adjacencia[z][x] != Integer.MAX_VALUE) {
+         if (adjacencia[y][x] > adjacencia[y][z] + adjacencia[z][x]) {
+         adjacencia[y][x] = adjacencia[y][z] + adjacencia[z][x];
+         }
+         }
+         }
+         }
+         }*/
+    }
+    
+    public void infinito(){
+        for(int i=0; i<tamanho; i++){
+            for(int j=0; j<tamanho; j++){
+                adjacencia[i][j] = Float.MAX_VALUE;
+            }
+        }
+    }
+    
+    float[][] getAdjacencia() {
         return adjacencia;
+    }
+
+    int[][] getCaminhos() {
+        return passagens;
     }
 }
